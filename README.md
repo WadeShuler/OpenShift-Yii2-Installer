@@ -1,8 +1,8 @@
 # OpenShift-Yii2-Installer
 
-A simple bash script to download and install Yii2 (basic and advanced) automatically setup for OpenShift applications.
+A simple bash script to download and install Yii2 (basic and advanced) automatically setup for OpenShift applications. Use this repo's Git URL when making your next OpenShift app!
 
-This is still in **Beta** and is rough around the edges. It's mostly for my personal use, but others might benefit from it. Hopefully, with some more time and tests, this can be streamlined to push all the way to OpenShift seamlessly. For right now, it just installs Yii2 and combines the action_hooks so it WILL work on OpenShift when you push it on the server.
+**Currently Tested Yii2 Version:** 2.0.8
 
 This combines my [OpenShift Yii2 Config](https://github.com/WadeShuler/OpenShift-Yii2-Config) with the Yii2 Framework. My config is a `.openshift` directory with action hooks to make Yii2 (basic and advanced) work on OpenShift magically. It handles the DocumentRoot, symlinks, composer, yii init (optional), and yii migrate (optional). Thus making for magical and seamless use between Yii2 and OpenShift.
 
@@ -10,35 +10,36 @@ The installer allows you to choose the Yii template (basic or advanced) and whic
 
 ## Instructions
 
-1. Clone this repo into your `htdocs` or wherever your sites are located for development:
+1. When you create a new OpenShift PHP Application, use this project repo for the GitHub source:
 
-        git clone https://github.com/WadeShuler/OpenShift-Yii2-Installer.git yourappname
+        https://github.com/WadeShuler/OpenShift-Yii2-Installer.git
 
-    Replace "yourappname" with the directory name for your new Yii2 project.
+2. After your application is created, clone it! In terminal, in your `htdocs`:
 
-2. Delete the `.git` directory, which houses the version control for this installer project. You will want to delete it and use your own. I am not sure how to handle this yet, and feel if my installer deletes it on it's own, that it may cause problems for other people by accidently deleting their real git data.
+        git clone ssh://576457ec89f5cf89ad0000fa@yii2membersystem-wadeshuler.rhcloud.com/~/git/yii2membersystem.git/ yourappname
 
-        rm -rf .git
+    Replace "yourappname" with the name for your new directory git creates.
 
-3. From your terminal, execute the `install` bash script:
+3. Run the installer
 
         ./install
 
-    Follow the installer guide. When it is done, you will have a working yii2 app ready to work on OpenShift.
+4. Follow the installer and choose the options you want (basic/advanced, version number, etc) Once the installer finishes successfully, you have a perfect working version of Yii2 ready to push to OpenShift!
+
+5. Add/Commit/Push to see your new working Yii2 app on OpenShift:
+
+        git add .
+        git commit -m "initial commit"
+        git push
+
+6. Check it out! Go to your OpenShift App's URL in your browser. Remember, add `/admin` to access the backend.
+    Try it locally :) On your local host, you still have to use `/frontend` or `/backend`. The `.htaccess` will map it to `web` for you :)
+
+    Locally, you should still have Gii and the Yii Debug Toolbar. Whether it's basic or advanced, it should know the difference and handle everything accordingly.
+
+7. Now add your customizations and enjoy!
 
 
+If you have any questions, let me know. I am also open to hearing advice on how to make this better. It still needs to stay just an installer, and respect that we don't want to make decisions for the end user. This will stay as an installer to make Yii2 work on OpenShift by handling the action_hook, Environment Variables for DB use, composer, init, etc. Any extra bells and wistles, are not what this project is about.
 
-## How to add your OpenShift remote URls so you can push to OpenShift?
-
-I am not sure how to handle pulling the current PHP app from your OpenShift cartridge yet. If you clone it, it comes with some default files, such as `index.php`. Also, it clones into it's own directory...
-
-You could follow my instructions above, then set the Git remote URls to your OpenShift app, so it can push/pull from the app you created. However, both sides are out of sync with eachother... What would pulling it do to my current files (.openshift-installer, install, and possibly the yii2 app generated)? What would it do with the index.php file on the OpenShift app currently? I need to test these scenarios.
-
-Instead of pulling from your OpenShift app first, what if you push to it? What would it do? Would git be out of sync and fail, what would it do with the current files on both sides?
-
-Is there a sync command for git that would forget the other side and sync it with the localhost version?
-
-
-This installer script gets you setup locally. You can find a way to get this on your OpenShift app, I am sure :) You might have to just simply: clone your OpenShift app, delete everything in it, copy the installer's generated files into it, and add/commit/push.
-
-Whatever it is, this saves a few steps and some headaches. If you have suggestions, let me know, and hopefully we can figure out a solid way to streamline the rest of the way.
+Let devs dev on their own free will. This just lets you hit the ground running using Yii2 and OpenShift!
