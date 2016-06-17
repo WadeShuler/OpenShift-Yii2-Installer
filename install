@@ -1,0 +1,224 @@
+#!/bin/bash
+
+# this requires my composer tweak (make tutorial)
+# do which composer, and if failes to find it, halt script with error
+
+# needs to check git, and halt with error if not found
+
+
+# TODO: NEED TO MAKE 2 dirs in src.. basic and advanced... and handle openshift for basic
+# and update my code below when copying them over
+
+
+
+export APP_ROOT=$(pwd)
+
+export INSTALL_PATH=$APP_ROOT/.openshift-installer
+export SRC_PATH=$INSTALL_PATH/src
+export TMP_PATH=$INSTALL_PATH/tmp
+
+# ---- setup some default values ----
+
+export OSCONFIG_TMP_DIRNAME="os-config"
+export YII_TMP_DIRNAME="yiiapp"
+export COMBINED_TMP_DIRNAME="combined"
+
+export YII_BASE_VERSION="2.0.8"
+export YII_BASE_TYPE="basic"
+
+# ---- useful functions ----
+
+function repeatSymbol {
+    symbol=$1
+    count=$2
+    for ((i=1; i<=count; i++)); do
+        echo -n "="
+    done
+}
+
+function printBanner {
+    message=$1
+    count=$((${#message} + 8))
+
+    printf "\n"
+    printf "\n"
+    repeatSymbol "=" $count
+
+    printf "\n=== $message ===\n"
+
+    repeatSymbol "=" $count
+    printf "\n"
+    printf "\n"
+
+}
+
+# ---- Start Script ----
+
+printBanner "OpenShift Yii2 Installer"
+printf "> Created By: Wade Shuler\n\n"
+
+echo "Do you want the 'basic' or 'advanced' Yii2 template?"
+echo "[0] basic"
+echo "[1] advanced"
+read -p 'Which template: ' userAppType
+
+if [ $userAppType == 0 ] || [ $userAppType == 'basic' ]; then
+    echo "You chose basic"
+    YII_BASE_TYPE="basic"
+elif [ $userAppType == 1 ] || [ $userAppType == 'advanced' ]; then
+    echo "You chose advanced"
+    YII_BASE_TYPE="advanced"
+else
+    echo "Invalid Choice. Exiting!"
+    exit 0
+fi
+
+export SRC_APP_PATH=$INSTALL_PATH/src/$YII_BASE_TYPE
+
+#echo "current type is: $YII_BASE_TYPE"
+
+echo "Enter the Yii version number you want to use."
+echo "Leave blank (just hit enter) to use current version ($YII_BASE_VERSION)"
+read -p 'Which version: ' userAppVersion
+
+if [ -z "${userAppVersion// }" ]; then
+    echo "You chose the current version."
+else
+    versionPattern='^([0-9]+\.){0,2}(\*|[0-9]+)$'
+    if [[ $userAppVersion =~ $versionPattern ]]; then
+        echo "You chose: $userAppVersion"
+        YII_BASE_VERSION=$userAppVersion
+    else
+        echo "ERROR: Invalid version number!"
+        exit 0
+    fi
+fi
+
+
+# ---- some pre checks ----
+
+
+if [ ! -d $INSTALL_PATH ]; then
+    # make sure we got the min req
+    echo "--> ERROR: '.openshift-installer' dir not found. Something went wrong!"
+    exit $?
+fi
+
+if [ ! -d $SRC_PATH ]; then
+    echo "--> ERROR: 'src' dir not found. Something went wrong!"
+    exit $?
+fi
+
+echo "app root: $APP_ROOT"
+echo "install path: $INSTALL_PATH"
+echo "temp path: $TMP_PATH"
+echo "osconfig temp dirname: $OSCONFIG_TMP_DIRNAME"
+echo "yii temp dirname: $YII_TMP_DIRNAME"
+echo "yii base version: $YII_BASE_VERSION"
+echo "yii base type: $YII_BASE_TYPE"
+
+# ---- START OF LOGIC ----
+
+# cd into .openshift-installer directory
+cd $INSTALL_PATH
+
+# tmp directory needs to be deleted if it exists, then re-created fresh
+if [ -d $TMP_PATH ]; then
+    # tmp directory found, delete it to start fresh
+    echo "--> tmp directory found, deleting it"
+    rm -rf $TMP_PATH
+
+    if [ ! -d $TMP_PATH ]; then
+        echo "--> tmp directory deleted!"
+    else
+        # tmp directory still there, halt
+        echo "--> ERROR: Could not delete 'tmp' directory. Delete it and try again!"
+        exit $?
+    fi
+fi
+
+mkdir $TMP_PATH
+if [ ! -d $TMP_PATH ]; then
+    # tmp directory not created
+    echo "--> ERROR: Could not create 'tmp' directory. Check your permissions!"
+    exit $?
+fi
+echo "--> Created tmp directory!"
+
+# cd into the new tmp directory
+cd $TMP_PATH
+
+# clone my project into it's own directory
+git clone https://github.com/WadeShuler/OpenShift-Yii2-Config.git $OSCONFIG_TMP_DIRNAME
+
+if [ ! -d $TMP_PATH/$OSCONFIG_TMP_DIRNAME ] && [ ! -d $TMP_PATH/$OSCONFIG_TMP_DIRNAME/.openshift ]; then
+    # My OpenShift config source not installed
+    echo "--> ERROR: OpenShift Yii2 Config not installed via Git!"
+    exit $?
+fi
+
+if [ $YII_BASE_TYPE == 'basic' ]; then
+    composer create-project yiisoft/yii2-app-basic $YII_TMP_DIRNAME $YII_BASE_VERSION
+else
+    composer create-project yiisoft/yii2-app-advanced $YII_TMP_DIRNAME $YII_BASE_VERSION
+fi
+
+if [ ! -d $TMP_PATH/$YII_TMP_DIRNAME ] && [ ! -f $TMP_PATH/$YII_TMP_DIRNAME/composer.json ] && [ ! -f $TMP_PATH/$YII_TMP_DIRNAME/yii.bat ]; then
+    # Yii app source not found
+    echo "--> ERROR: Yii application not installed via Composer!"
+    exit $?
+fi
+
+# Go back to app root
+cd $APP_ROOT
+
+# Here, we should have a directory for my OpenShift config and one for Yii
+# we need to merge the two together
+
+mkdir $TMP_PATH/$COMBINED_TMP_DIRNAME
+if [ ! -d $TMP_PATH/$COMBINED_TMP_DIRNAME ]; then
+    # tmp directory not created
+    echo '--> ERROR: Could not create "$COMBINED_TMP_DIRNAME" directory. Check your permissions!'
+    exit $?
+fi
+echo "--> Combined directory created!"
+
+# move .openshift directory into combined
+echo "--> Moving .openshift directory to combined directory..."
+mv $TMP_PATH/$OSCONFIG_TMP_DIRNAME/.openshift $TMP_PATH/$COMBINED_TMP_DIRNAME
+
+# move yii app into combined
+echo "--> Moving yii app to combined directory..."
+cp -rf $TMP_PATH/$YII_TMP_DIRNAME/. $TMP_PATH/$COMBINED_TMP_DIRNAME
+
+# need to copy my modifications (OS DB ENV VARS, utf8mb4, htaccess, etc)
+echo "--> Copying modifications from src app path..."
+cp -rf $SRC_APP_PATH/. $TMP_PATH/$COMBINED_TMP_DIRNAME
+
+# move combined into app root
+echo "--> Moving combined to app root..."
+cp -rf $TMP_PATH/$COMBINED_TMP_DIRNAME/. $APP_ROOT
+
+# need to modify gitignore to exclude itself
+if [ ! -f $APP_ROOT/.gitignore ]; then
+    echo "--> ERROR: '.gitignore' was not found in root directory!"
+    exit $?
+fi
+
+printf "\n# yii2 openshift installer\n.openshift-installer\ninstall" >> $APP_ROOT/.gitignore
+
+# ---- CLEANUP ----
+
+# delete tmp dir
+if [ -d $TMP_PATH ]; then
+    # tmp directory found, delete it to start fresh
+    rm -rf $TMP_PATH
+
+    if [ -d $TMP_PATH ]; then
+        # tmp directory still there, halt
+        echo "--> ERROR: Could not delete 'tmp' directory for cleanup. Delete it manually and check permissions!"
+        exit $?
+    fi
+fi
+
+echo "--> SUCCESS: Looks like the install process went according to plan :)"
