@@ -16,9 +16,9 @@ The installer allows you to choose the Yii template (basic or advanced) and whic
 
 2. After your application is created, clone it! In terminal, in your `htdocs`:
 
-        git clone ssh://576457ec89f5cf89ad0000fa@yii2membersystem-wadeshuler.rhcloud.com/~/git/yii2membersystem.git/ yourappname
+        git clone ssh://xxxxx@<APP>-<NAME>.rhcloud.com/~/git/<APP>.git/ yourappname
 
-    Replace "yourappname" with the name for your new directory git creates.
+    Replace the URL with your OpenShift app's real URL! Also replace "yourappname" with the name for your new directory git creates.
 
 3. Run the installer
 
