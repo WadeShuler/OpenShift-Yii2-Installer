@@ -21,7 +21,7 @@ The installer allows you to choose the Yii template (basic or advanced) and whic
     Replace the URL with your OpenShift app's real URL! Also replace "yourappname" with the name for your new directory git creates.
 
 3. Run the installer
-
+        cd yourappname
         ./install
 
 4. Follow the installer and choose the options you want (basic/advanced, version number, etc) Once the installer finishes successfully, you have a perfect working version of Yii2 ready to push to OpenShift!
