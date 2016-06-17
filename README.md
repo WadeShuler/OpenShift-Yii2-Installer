@@ -21,6 +21,7 @@ The installer allows you to choose the Yii template (basic or advanced) and whic
     Replace the URL with your OpenShift app's real URL! Also replace "yourappname" with the name for your new directory git creates.
 
 3. Run the installer
+    
         cd yourappname
         ./install
 
