@@ -23,7 +23,7 @@ export OSCONFIG_TMP_DIRNAME="os-config"
 export YII_TMP_DIRNAME="yiiapp"
 export COMBINED_TMP_DIRNAME="combined"
 
-export YII_BASE_VERSION="2.0.8"
+export YII_BASE_VERSION="2.0.9"
 export YII_BASE_TYPE="basic"
 
 # ---- useful functions ----

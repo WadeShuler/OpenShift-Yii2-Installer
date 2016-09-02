@@ -4,6 +4,10 @@ A simple bash script to download and install Yii2 (basic and advanced) automatic
 
 **Currently Tested Yii2 Version:** 2.0.8
 
+I have not tested this with 2.0.9, but it should work. I set the default version to use 2.0.9, so we will see. I will remove this line when confirmed.
+
+**Currently this is BETA:** If you have any issues, please let me know by creating an issue. I didn't intend on the public using it, but was open to it. I cobbled this together for personal use. I hope to get some of you to be willing to beta test this and issue any issues, so I can get a stable version of this for the rest of the world. -- So use at your own risk, I am not promising this will work for you. Which is why it needs beta tested in the wild, some things worked out, so this can become a goto script for us using Yii2 on OpenShift.
+
 This combines my [OpenShift Yii2 Config](https://github.com/WadeShuler/OpenShift-Yii2-Config) with the Yii2 Framework. My config is a `.openshift` directory with action hooks to make Yii2 (basic and advanced) work on OpenShift magically. It handles the DocumentRoot, symlinks, composer, yii init (optional), and yii migrate (optional). Thus making for magical and seamless use between Yii2 and OpenShift.
 
 The installer allows you to choose the Yii template (basic or advanced) and which Yii version number to install. It will download it and merge my OpenShift config automagically for you.
@@ -21,9 +25,13 @@ The installer allows you to choose the Yii template (basic or advanced) and whic
     Replace the URL with your OpenShift app's real URL! Also replace "yourappname" with the name for your new directory git creates.
 
 3. Run the installer
-    
+
         cd yourappname
         ./install
+
+*Note:* You may have to give execute permissions to the script first: `chmod +x install`
+
+*Windows Users:* You just have to run: `install`
 
 4. Follow the installer and choose the options you want (basic/advanced, version number, etc) Once the installer finishes successfully, you have a perfect working version of Yii2 ready to push to OpenShift!
 
